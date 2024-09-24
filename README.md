@@ -1,1 +1,1 @@
-"Implemented broken regex to nfa program" 
+Implemented broken regex to nfa program 
