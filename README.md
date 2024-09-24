@@ -1,1 +1,1 @@
- broke regex to nfa program 
+ broken regex to nfa program 
