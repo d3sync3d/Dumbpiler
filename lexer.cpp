@@ -97,10 +97,10 @@ int glob_stateNum = 0;
 
 class Edge{
     public:
-    char transitionOnInput;
+    std::string transitionOnInput;
     int destinationId;
     
-    Edge(char input, int destId):
+    Edge(std::string input, int destId):
         transitionOnInput(input), destinationId(destId){
     }
 };
@@ -187,11 +187,11 @@ NFA OrNFA(){
     State state1;
     State state2;
 
-    Edge a1 =  Edge('^', nfa1.start.getStateId());
-    Edge a2 = Edge('^', nfa2.start.getStateId());
+    Edge a1 =  Edge("ε", nfa1.start.getStateId());
+    Edge a2 = Edge("ε", nfa2.start.getStateId());
 
-    Edge b1 = Edge('^', state2.getStateId());
-    //Edge b2 = Edge('^', state2.getStateId());
+    Edge b1 = Edge("ε", state2.getStateId());
+    //Edge b2 = Edge("ε", state2.getStateId());
 
     state1.addEdge(a1);
     state1.addEdge(a2);
@@ -218,9 +218,9 @@ NFA ZeroAndMoreNFA(){
 
     State state1;
     State state2;
-    Edge edge1 = Edge('^', state2.getStateId());
-    Edge edge2 = Edge('^', nfa.start.getStateId());
-    Edge edge3 = Edge('^', state1.getStateId());
+    Edge edge1 = Edge("ε", state2.getStateId());
+    Edge edge2 = Edge("ε", nfa.start.getStateId());
+    Edge edge3 = Edge("ε", state1.getStateId());
 
     state1.addEdge(edge1);
     state1.addEdge(edge2);
@@ -244,7 +244,7 @@ NFA ConcatenateNFA(){
     NFA nfa2 = nfaStack_pop();
     NFA nfa1 = nfaStack_pop();
 
-    Edge tempEdge = Edge('^', nfa2.start.getStateId());
+    Edge tempEdge = Edge("ε", nfa2.start.getStateId());
     nfa1.accept.addEdge(tempEdge);
     nfa1.updateInnerStates();
 
@@ -260,7 +260,7 @@ NFA ConcatenateNFA(){
     return resultNFA;
 }
 
-NFA CreateNfa(char transitionOnInput){
+NFA CreateNfa(std::string transitionOnInput){
     State state1;
     State state2;
     Edge edgeObj = Edge(transitionOnInput, state2.getStateId());
@@ -277,15 +277,18 @@ NFA CreateNfa(char transitionOnInput){
 //nfa to dfa
 //print fa
 void printNFA(NFA& nfa){
-    system("rm temp.dot");
-    system("rm NFA.png");
     std::ofstream outFile("temp.dot");
     outFile<<"digraph G{\n";
-
+    outFile<<"bgcolor=\"transparent\";\n";
+    outFile<<"node [color=\"white\"];\n";
+    outFile<<"edge [color=\"white\"];\n";
+    outFile<<"rankdir=\"LR\";\n";
+    outFile<<nfa.accept.stateName<<" [shape=\"doublecircle\"];\n";
     for(int i=0; i<nfa.innerStates.size(); i++){
+        outFile<<nfa.innerStates[i].stateName<<" [label=\"\"];\n";
         for(int j=0; j<nfa.innerStates[i].outEdges.size(); j++){
             outFile<<nfa.innerStates[i].stateName<<" -> "<<getStateName(nfa.innerStates[i].outEdges[j].destinationId)<<
-                " [label=\""<<nfa.innerStates[i].outEdges[j].transitionOnInput<<"\"];\n";
+                " [label=\""<<nfa.innerStates[i].outEdges[j].transitionOnInput<<"\" fontcolor=\"white\"];\n";
         }
     }
 
@@ -293,6 +296,7 @@ void printNFA(NFA& nfa){
     outFile.close();
 
     system("dot -Tsvg temp.dot -o NFA.svg");
+    system("rsvg-convert NFA.svg > NFA.png");
 }
 //main
 int main(){
@@ -300,20 +304,10 @@ int main(){
     std::cout<<"Enter Regular Expression: ";
     std::cin>>inputinfix;
 
-    char* inputinfixarray = new char[inputinfix.length()+1];
-    strcpy(inputinfixarray, inputinfix.c_str());
-
     infixToPostfix(inputinfix);
 
     std::cout<<"Postfix notation: "<<postfixexp<<std::endl;
 
-//    NFA myNFA = CreateNfa('a');
-//    NFA nfa2 = CreateNfa('b');
-   
-//    NFA plsNfa = ConcatenateNFA();
-
-//    printNFA(plsNfa);
-    //std::cout<<plsNfa.start.stateName<<" ---------"<<plsNfa.start.outEdges[0].transitionOnInput<<"----------> " <<plsNfa.accept.stateName<<std::endl;
 
     for(int i=0; i<postfixindex;i++){
         if(postfixexp[i]=='.'){
@@ -329,7 +323,7 @@ int main(){
             printNFA(myNFA);
         }
         else{
-            CreateNfa(postfixexp[i]);
+            CreateNfa(std::string(1, postfixexp[i]));
         }
     }
     return 0;
