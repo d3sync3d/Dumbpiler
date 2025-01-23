@@ -1,1 +1,3 @@
- broken regex to nfa program 
+EDIT: NOT BROKEN ANYMORE
+
+creates NFA from given regex
